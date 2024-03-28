@@ -23,6 +23,7 @@
 
 
 import { UDPPort } from 'osc';
+import { Context, Note } from './AbletonClip';
 
 // Create an osc.js UDP Port listening on port 57121.
 var udpPort = new UDPPort({
@@ -33,9 +34,20 @@ var udpPort = new UDPPort({
 
 // Listen for incoming OSC messages.
 udpPort.on("message", function (oscMsg, timeTag, info) {
-  console.log("An OSC message just arrived!", oscMsg);
-  console.log("Remote info is: ", info);
-});
+  const clipData = JSON.parse(oscMsg.args[0].value)
+  const context: Context = { clip: clipData.clip, scale: clipData.scale, grid: clipData.grid }
+  const notes = clipData.notes.map((note: any) => new Note(note))
+  notes.forEach(note => {
+    note.pitch += 1
+  })
+  
+  const newNotes = JSON.stringify(notes)
+
+  udpPort.send({
+    address: "/newNotes",
+    args: [{type: "s", value: newNotes}]
+  }, "127.0.0.1", 5336)
+})
 
 // Open the socket.
 udpPort.open();

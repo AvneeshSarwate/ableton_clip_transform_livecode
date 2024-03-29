@@ -1,3 +1,15 @@
+## Ableton clip livecoding
+
+This project is a proof of concept for livecoding MIDI clip transformations using Node and Max for Live. 
+The basic idea is that a Max Midi Effect grabs the clip data from the clip that is open in the clip view, and sends it to a Node server. 
+The Node server can then transform the notes in the clip, and send the transformed notes back to the Max device. 
+
+Launching the node server with [nodemon](https://www.npmjs.com/package/nodemon) allows you to livecode the node server.
+
+New in Live 12, you can look at the clip editor view and a track's devices at the same time, allowing you to build custom editing interfaces in a Max For Live device. This proof of concept simply includes a single button to transform the clip, but much more is possible. 
+
+![Ableton 12 Screenshot](ableton_12_screenshot.png)
+
 
 ### Installing
 

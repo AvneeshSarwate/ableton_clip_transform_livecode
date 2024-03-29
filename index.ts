@@ -32,43 +32,34 @@ var udpPort = new UDPPort({
   metadata: true
 });
 
+function sendNotes(notes: Note[]) {
+  const newNotes = JSON.stringify({ notes })
+  udpPort.send({
+    address: "/newNotes",
+    args: [{type: "s", value: newNotes}]
+  }, "127.0.0.1", 5336)
+}
+
 // Listen for incoming OSC messages.
 udpPort.on("message", function (oscMsg, timeTag, info) {
   const clipData = JSON.parse(oscMsg.args[0].value)
   const context: Context = { clip: clipData.clip, scale: clipData.scale, grid: clipData.grid }
   const inputNotes: Note[] = clipData.notes
-  console.log("inputNotes", inputNotes)
-  const notes = inputNotes.map(note => new Note(note))
-  notes.forEach(note => {
-    note.pitch += 1
-  })
-  
-  const newNotes = JSON.stringify({ notes })
-  console.log("newNotes", newNotes)
 
-  udpPort.send({
-    address: "/newNotes",
-    args: [{type: "s", value: newNotes}]
-  }, "127.0.0.1", 5336)
+  const outputNotes = transposeNotes(inputNotes, -5)
+
+  sendNotes(outputNotes)
 })
 
 // Open the socket.
 udpPort.open();
 
 
-// When the port is read, send an OSC message to, say, SuperCollider
-// udpPort.on("ready", function () {
-//   udpPort.send({
-//       address: "/s_new",
-//       args: [
-//           {
-//               type: "s",
-//               value: "default"
-//           },
-//           {
-//               type: "i",
-//               value: 100
-//           }
-//       ]
-//   }, "127.0.0.1", 57110);
-// });
+
+function transposeNotes(inputNotes: Note[], amount: number) {
+  const notes = inputNotes.map(note => new Note(note))
+  notes.forEach(note => {
+    note.pitch += amount
+  })
+  return notes
+}

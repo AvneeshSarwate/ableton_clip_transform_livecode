@@ -36,12 +36,15 @@ var udpPort = new UDPPort({
 udpPort.on("message", function (oscMsg, timeTag, info) {
   const clipData = JSON.parse(oscMsg.args[0].value)
   const context: Context = { clip: clipData.clip, scale: clipData.scale, grid: clipData.grid }
-  const notes = clipData.notes.map((note: any) => new Note(note))
+  const inputNotes: Note[] = clipData.notes
+  console.log("inputNotes", inputNotes)
+  const notes = inputNotes.map(note => new Note(note))
   notes.forEach(note => {
     note.pitch += 1
   })
   
-  const newNotes = JSON.stringify(notes)
+  const newNotes = JSON.stringify({ notes })
+  console.log("newNotes", newNotes)
 
   udpPort.send({
     address: "/newNotes",

@@ -1,5 +1,4 @@
 export class Note {
-  note_id: number = -1;
   pitch: number = 60;
   start_time: number = 0;
   duration: number = 1;
@@ -10,7 +9,14 @@ export class Note {
   release_velocity: number = 64;
 
   constructor(data: Partial<Note>) {
-    Object.assign(this, data);
+    this.pitch = data.pitch ?? 60;
+    this.start_time = data.start_time ?? 0;
+    this.duration = data.duration ?? 1;
+    this.velocity = data.velocity ?? 100;
+    this.mute = data.mute ?? false;
+    this.probability = data.probability ?? 1;
+    this.velocity_deviation = data.velocity_deviation ?? 0;
+    this.release_velocity = data.release_velocity ?? 64;
   }
 }
 

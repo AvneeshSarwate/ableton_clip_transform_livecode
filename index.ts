@@ -1,25 +1,5 @@
-// import { Client, Message, Server } from 'node-osc';
-
-// const client = new Client('127.0.0.1', 5336);
-
-
-
-
-// const oscServer = new Server(5335, '127.0.0.1', () => {
-//   console.log("oscServer is running")
-// });
-
-// oscServer.on('message', function (msg) {
-//   console.log("oscMessage", msg)
-
-//   const outMsg = new Message('/newNotes');
-  
-//   client.send(outMsg, (err) => {
-//     if (err) {
-//       console.error(new Error(err.message));
-//     }
-//   });
-// });
+const INPUT_PORT = 5335
+const OUTPUT_PORT = 5336
 
 
 import { UDPPort } from 'osc';
@@ -28,7 +8,7 @@ import { Context, Note } from './AbletonClip';
 // Create an osc.js UDP Port listening on port 57121.
 var udpPort = new UDPPort({
   localAddress: "127.0.0.1",
-  localPort: 5335,
+  localPort: INPUT_PORT,
   metadata: true
 });
 
@@ -37,7 +17,7 @@ function sendNotes(notes: Note[]) {
   udpPort.send({
     address: "/newNotes",
     args: [{type: "s", value: newNotes}]
-  }, "127.0.0.1", 5336)
+  }, "127.0.0.1", OUTPUT_PORT)
 }
 
 // Listen for incoming OSC messages.

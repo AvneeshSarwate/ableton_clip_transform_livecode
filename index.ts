@@ -3,7 +3,7 @@ const OUTPUT_PORT = 5337
 
 
 import { UDPPort } from 'osc';
-import { Context, Note } from './AbletonClip';
+import { Context, OutputNote, InputNote } from './AbletonClip';
 
 // Create an osc.js UDP Port listening on port 57121.
 var udpPort = new UDPPort({
@@ -12,8 +12,9 @@ var udpPort = new UDPPort({
   metadata: true
 });
 
-function sendNotes(notes: Note[]) {
-  const newNotes = JSON.stringify({ notes })
+function sendNotes(notes: InputNote[]) {
+  const outputNotes = notes.map(note => new OutputNote(note))
+  const newNotes = JSON.stringify({ notes: outputNotes })
   udpPort.send({
     address: "/newNotes",
     args: [{type: "s", value: newNotes}]
@@ -25,14 +26,21 @@ udpPort.on("message", function (oscMsg, timeTag, info) {
   try {
     const clipData = JSON.parse(oscMsg.args[0].value)
     const context: Context = { clip: clipData.clip, scale: clipData.scale, grid: clipData.grid }
-    const inputNotes: Note[] = clipData.notes
-    const selectedNotes: Note[] = clipData.selectedNotes
+    const inputNotes: InputNote[] = clipData.notes
+    const selectedNotes: InputNote[] = clipData.selectedNotes
     const funcName: string = clipData.funcName
+    
+    let outputNotes: InputNote[] = []
+    switch (funcName) {
+      case "func1":
+        outputNotes = transposeSelectedNotesUpOctave(inputNotes, selectedNotes)
+        break
+      case "func2":
+        outputNotes = transposeSelectedNotesDownOctave(inputNotes, selectedNotes)
+        break
+    }
 
-    console.log("clipData", clipData)
-    console.log("notes", inputNotes.map(note => note.pitch), "selected", selectedNotes.map(note => note.pitch))
-
-    const outputNotes = transposeNotes(inputNotes, -5)
+    console.log("outputNotes", outputNotes)
 
     sendNotes(outputNotes)
   } catch (e) {
@@ -45,10 +53,27 @@ udpPort.open();
 
 
 
-function transposeNotes(inputNotes: Note[], amount: number) {
-  const notes = inputNotes.map(note => new Note(note))
+function transposeNotes(inputNotes: InputNote[], amount: number): InputNote[] {
+  const notes: InputNote[] = inputNotes.map(note => ({...note}))
   notes.forEach(note => {
     note.pitch += amount
   })
   return notes
 }
+
+function transposeSelectedNotesUpOctave(inputNotes: InputNote[], selectedNotes: InputNote[]): InputNote[] {
+  const selectedNoteIds = selectedNotes.map(note => note.note_id)
+  const nonSelectedNotes = inputNotes.filter(note => !selectedNoteIds.includes(note.note_id))
+
+  const transposedSelectedNotes = transposeNotes(selectedNotes, 12)
+  return [...nonSelectedNotes, ...transposedSelectedNotes]
+}
+
+function transposeSelectedNotesDownOctave(inputNotes: InputNote[], selectedNotes: InputNote[]): InputNote[] {
+  const selectedNoteIds = selectedNotes.map(note => note.note_id)
+  const nonSelectedNotes = inputNotes.filter(note => !selectedNoteIds.includes(note.note_id))
+
+  const transposedSelectedNotes = transposeNotes(selectedNotes, -12)
+  return [...nonSelectedNotes, ...transposedSelectedNotes]
+}
+

@@ -26,7 +26,7 @@ udpPort.on("message", function (oscMsg, timeTag, info) {
     const clipData = JSON.parse(oscMsg.args[0].value)
     const context: Context = { clip: clipData.clip, scale: clipData.scale, grid: clipData.grid }
     const inputNotes: Note[] = clipData.notes
-    const selectedNotes: Note[] = clipData.selectedNotes.notes
+    const selectedNotes: Note[] = clipData.selectedNotes
 
     console.log("clipData", clipData)
     console.log("notes", inputNotes.map(note => note.pitch), "selected", selectedNotes.map(note => note.pitch))

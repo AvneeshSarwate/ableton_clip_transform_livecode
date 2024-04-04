@@ -1,5 +1,5 @@
 const INPUT_PORT = 5335
-const OUTPUT_PORT = 5336
+const OUTPUT_PORT = 5337
 
 
 import { UDPPort } from 'osc';
@@ -27,6 +27,7 @@ udpPort.on("message", function (oscMsg, timeTag, info) {
     const context: Context = { clip: clipData.clip, scale: clipData.scale, grid: clipData.grid }
     const inputNotes: Note[] = clipData.notes
     const selectedNotes: Note[] = clipData.selectedNotes
+    const funcName: string = clipData.funcName
 
     console.log("clipData", clipData)
     console.log("notes", inputNotes.map(note => note.pitch), "selected", selectedNotes.map(note => note.pitch))
